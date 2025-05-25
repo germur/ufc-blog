@@ -1,7 +1,6 @@
 // @ts-check
 
 import { rehypeHeadingIds } from '@astrojs/markdown-remark';
-import vercel from '@astrojs/vercel';
 import AstroPureIntegration from 'astro-pure';
 import { defineConfig } from 'astro/config';
 import rehypeKatex from 'rehype-katex';
@@ -28,23 +27,12 @@ const config = { ...theme, integ };
 
 // https://astro.build/config
 export default defineConfig({
-  // Top-Level Options
-  site: 'https://astro-pure.js.org',
-  // base: '/docs',
-  trailingSlash: 'never',
-
-  // Adapter
-  // https://docs.astro.build/en/guides/deploy/
-  // 1. Vercel (serverless)
-  adapter: vercel(),
-  output: 'server',
-  // 2. Vercel (static)
-  // adapter: vercelStatic(),
-  // 3. Local (standalone)
-  // adapter: node({ mode: 'standalone' }),
-  // output: 'server',
-  // ---
-
+  // 🔽🔽🔽 CAMBIOS IMPORTANTES AQUÍ 🔽🔽🔽
+  site: 'https://germur.github.io',  // Solo el dominio base
+  base: '/ufc-blog/',  // Subdirectorio exacto
+  trailingSlash: 'ignore',  // Mejor usar 'ignore' para GitHub Pages
+  
+  // ... (el resto de la configuración se mantiene igual)
   image: {
     service: {
       entrypoint: 'astro/assets/services/sharp'
@@ -52,26 +40,19 @@ export default defineConfig({
   },
 
   integrations: [
-    // astro-pure will automatically add sitemap, mdx & tailwind
-    // sitemap(),
-    // mdx(),
     UnoCSS({ injectReset: true }),
     AstroPureIntegration(config),
-    // Temporary fix vercel adapter
-    // static build method is not needed
     outputCopier({
       integ: ['sitemap', 'pagefind']
     })
   ],
-  // root: './my-project-directory',
 
-  // Prefetch Options
   prefetch: true,
-  // Server Options
+
   server: {
     host: true
   },
-  // Markdown Options
+
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [
@@ -86,7 +67,6 @@ export default defineConfig({
         }
       ]
     ],
-    // https://docs.astro.build/en/guides/syntax-highlighting/
     shikiConfig: {
       themes: {
         light: 'github-light',
@@ -102,11 +82,7 @@ export default defineConfig({
       ]
     }
   },
-  // Comentado la sección experimental que causa problemas
-  // experimental: {
-  //   svg: true,
-  //   contentIntellisense: true
-  // },
+
   vite: {
     plugins: []
   }
