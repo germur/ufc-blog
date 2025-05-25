@@ -1,0 +1,150 @@
+
+---
+import { Image } from 'astro:assets';
+import { Quote } from 'astro-pure/advanced';
+import { PostPreview } from 'astro-pure/components/pages';
+import { getBlogCollection, sortMDByDate } from 'astro-pure/server';
+import { Button, Icon, Label } from 'astro-pure/user';
+import PageLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/home/Section.astro';
+import avatar from '@/assets/avatar.png';
+import config from '@/site-config';
+import type { CollectionEntry } from 'astro:content';
+
+import '@splidejs/splide/dist/css/splide.min.css';
+
+type BlogPost = CollectionEntry<'blog'>;
+
+const ufcCategories = ['Peso Pesado', 'Peso Ligero', 'Historia UFC', 'Eventos PPV', 'Técnicas'];
+
+const MAX_POSTS = 10;
+const allPosts = await getBlogCollection() as BlogPost[];
+const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS) as BlogPost[];
+const featuredPosts = allPostsByDate.slice(0, 3);
+const latestPosts = allPostsByDate.slice(3);
+---
+
+<PageLayout meta={{ title: 'UFC Blog - Inicio' }}>
+  <main class='flex w-full flex-col items-center'>
+    <section class='animate mb-10 flex flex-col items-center gap-y-7' id='content-header'>
+      <Image
+        src={avatar}
+        alt='Logo UFC Blog'
+        class='h-28 w-auto rounded-full border p-1'
+        loading='eager'
+      />
+
+      <div class='flex flex-col items-center gap-y-4'>
+        <h1 class='text-3xl font-bold'>{config.title}</h1>
+        <p class="text-center text-muted-foreground max-w-xl">
+          Tu fuente definitiva de información, análisis y noticias sobre el mundo de la Ultimate Fighting Championship
+        </p>
+        <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
+          <Label title='Blog de UFC'>
+            <Icon name='octangon' class='size-5' slot='icon' />
+          </Label>
+        </div>
+      </div>
+
+      <a
+        href='/blog'
+        class='flex flex-row items-center gap-x-3 rounded-full border bg-red-600 px-4 py-2 text-sm text-white shadow-sm transition-shadow hover:shadow-md hover:bg-red-700'
+      >
+        <span class='relative flex items-center justify-center'>
+          <span
+            class='absolute size-2 animate-ping rounded-full border border-white bg-white opacity-75'
+          ></span>
+          <span class='size-2 rounded-full bg-white'></span>
+        </span>
+        <p class='font-medium'>Ver todos los artículos</p>
+      </a>
+    </section>
+
+    <div id='content' class='animate flex flex-col gap-y-10 md:w-4/5 lg:w-5/6'>
+
+      {featuredPosts.length > 0 && (
+        <Section title='Artículos Destacados'>
+          <div id="splide" class="splide">
+            <div class="splide__track">
+              <ul class="splide__list">
+                {featuredPosts.map(post => (
+                  <li class="splide__slide">
+                    <a href={`/blog/${post.id}`}>
+                      {post.data.heroImage?.src && (
+                        <img
+                          src={post.data.heroImage.src.src}
+                          alt={post.data.title}
+                          class="w-full h-48 object-cover rounded-lg"
+                          loading="lazy"
+                        />
+                      )}
+                      <h3 class="font-bold text-lg mt-2 line-clamp-2">{post.data.title}</h3>
+                      <p class="text-sm text-muted-foreground mt-1 line-clamp-3">{post.data.description}</p>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <script type="module" is:inline>
+            import Splide from 'https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.esm.min.js';
+
+            document.addEventListener('DOMContentLoaded', () => {
+              new Splide('#splide', {
+                perPage: 1,
+                gap: '1rem',
+                breakpoints: {
+                  640: { perPage: 1 },
+                  1024: { perPage: 2 },
+                },
+                arrows: true,
+                pagination: false,
+                drag: 'free',
+              }).mount();
+            });
+          </script>
+        </Section>
+      )}
+
+      {latestPosts.length > 0 && (
+        <Section title='Últimos Artículos'>
+          <ul class='flex flex-col gap-y-1.5 sm:gap-y-2'>
+            {latestPosts.map((p) => (
+              <li class='flex flex-col gap-x-2 sm:flex-row'>
+                <PostPreview post={p} />
+              </li>
+            ))}
+          </ul>
+          <Button title='Ver más artículos' class='w-fit self-end' href='/blog' style='ahead' />
+        </Section>
+      )}
+
+      <Section title='Categorías'>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {ufcCategories.map((category) => (
+            <a 
+              href={`/tags/${category.toLowerCase().replace(/\s+/g, '-')}`}
+              class="flex flex-col items-center justify-center p-4 border rounded-lg hover:shadow-md transition-shadow text-center"
+            >
+              <span class="text-lg font-medium">{category}</span>
+            </a>
+          ))}
+        </div>
+      </Section>
+
+      <Section title='Sobre UFC Blog'>
+        <p class='text-muted-foreground'>
+          UFC Blog es tu destino definitivo para todo lo relacionado con la Ultimate Fighting Championship. Desde análisis de peleas hasta perfiles de luchadores, historias de la UFC y cobertura de eventos, te mantenemos informado sobre el emocionante mundo de las artes marciales mixtas.
+        </p>
+        <p class='text-muted-foreground mt-3'>
+          Nuestro objetivo es proporcionar contenido de alta calidad para los fanáticos de la UFC, con análisis profundos, historias fascinantes y cobertura completa de todos los aspectos de este deporte.
+        </p>
+        <Button title='Más sobre nosotros' class='w-fit self-end mt-3' href='/about' style='ahead' />
+      </Section>
+
+    </div>
+
+    <Quote class='mt-12' />
+  </main>
+</PageLayout>
